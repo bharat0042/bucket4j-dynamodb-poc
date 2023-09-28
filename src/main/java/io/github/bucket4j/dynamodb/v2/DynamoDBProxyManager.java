@@ -76,24 +76,40 @@ public final class DynamoDBProxyManager {
         BaseDynamoDBProxyManager<String> proxyManager = stringKey(client, "my-table", ClientSideConfig.getDefault());
 
         BucketConfiguration configuration = BucketConfiguration.builder()
-                .addLimit(Bandwidth.classic(4, Refill.intervally(10, Duration.ofHours(1))))
+                .addLimit(Bandwidth.classic(10, Refill.intervally(10, Duration.ofHours(1))))
                 .build();
 
         BucketProxy bucket = proxyManager.builder().build(key, configuration);
         return bucket;
     }
 
-    public static void main(String[] args) {
-        BucketProxy bucketProxy = getBucketForString("thisisakey3");
-        System.out.println(bucketProxy.getAvailableTokens());
-        for(int i = 0; i < 10; i++) {
-            ConsumptionProbe probe = bucketProxy.tryConsumeAndReturnRemaining(1);
-            if (probe.isConsumed()) {
-                System.out.println("All good");
-                continue;
-            }
-            long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-            System.out.println("Not all good. Wait for : " + String.valueOf(waitForRefill));
-        }
-    }
+//    public static void main(String[] args) {
+//        BucketProxy bucketProxy = getBucketForString("thisisakey4");
+//
+//        System.out.println(bucketProxy.getAvailableTokens());
+//        for(int i = 0; i < 2; i++) {
+//            ConsumptionProbe probe = bucketProxy.tryConsumeAndReturnRemaining(1);
+//            if (probe.isConsumed()) {
+//                System.out.println("All good");
+//                continue;
+//            }
+//            long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
+//            System.out.println("Not all good. Wait for : " + String.valueOf(waitForRefill));
+//        }
+//
+////        below check works, can be removed
+//
+////      to check if proxyManager is really working or not
+////      for each ip, only one bucket should be created, at first request
+////      then  from second request onward, same bucket should be returned for ther key
+////        BucketProxy bucketProxy2 = getBucketForString("thisisakey4");
+////        BucketProxy bucketProxy4 = getBucketForString("thisisakey4");
+////        BucketProxy bucketProxy3 = getBucketForString("thisisakey4");
+////
+////        System.out.println("1 = " + bucketProxy.getAvailableTokens());
+////        System.out.println("2 = " + bucketProxy2.getAvailableTokens());
+////        System.out.println("3 = " + bucketProxy3.getAvailableTokens());
+////        System.out.println("4 = " + bucketProxy4.getAvailableTokens());
+//
+//    }
 }
